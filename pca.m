@@ -2,20 +2,31 @@
 close all;
 clear all;
 clc;
-x = imread('./Resource/3.jpg');
-y = imread('./Resource/4.jpg');
-figure, imshow(x);
-figure, imshow(y);
-k=[x(:) y(:)];
-k=double(k);
+dbstop if error;
+
+s=cell(1,2);
+% read N image
+s{1} = imread('./Resource/high2.jpg');
+s{2} = imread('./Resource/low2.jpg');
+[m,n]=size(s);
+k=[s{1}(:)];
+% show images
+for i=1:n
+    figure, imshow(s{i});
+    if i ~= 1
+        k=[k s{i}(:)];
+    end;
+end;
+k = double(k);
 %求X标准化的协差矩阵的特征根和特征向量
 [V D] = eig(cov(k));
-if (D(1,1) > D(2,2))
-  a = V(:,1)./sum(V(:,1));
-else 
-  a = V(:,2)./sum(V(:,2));
-end;
+maxValue = max(max(D));
+[r,c] = find(maxValue == D);
+a = V(:,r)./sum((V(:,r)));
 
-% and fuse
-g = a(1)*x+a(2)*y; 
+g = zeros(size(s{1}),'uint8');
+for i=1:r
+    g = g + a(i)*s{i};
+end
+
 figure, imshow(g);
